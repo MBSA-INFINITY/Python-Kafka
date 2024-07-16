@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{num}}</title>
+</head>
+<body>
+    <h1>Youtube Upload Kafka Exampl - {{num}}</h1>
+    <div id="container">
+
+    </div>
+    <script>
+        myContainer = document.getElementById("container")
+              var source = new EventSource("{{ url_for('sse.stream') }}");
+            source.addEventListener('{{num}}', function(event) {
+                var data = JSON.parse(event.data);
+                console.log(data)
+                myContainer.innerHTML+=`<h3>${data.message}</h3><br>`
+
+            }, false);
+    </script>
+    
+</body>
+</html>

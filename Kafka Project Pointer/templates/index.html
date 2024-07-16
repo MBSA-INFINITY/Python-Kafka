@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Div</title>
+    <style>
+        .draggable-div {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            position: absolute;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="draggable-div" id="myDiv"></div>
+
+    <script>
+        const div = document.getElementById('myDiv');
+        let isDragging = false;
+        let posX = 0;
+        let posY = 0;
+
+        // Event listener for mouse down (start dragging)
+        div.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            posX = e.clientX - div.getBoundingClientRect().left;
+            posY = e.clientY - div.getBoundingClientRect().top;
+        });
+
+        // Event listener for mouse move (dragging)
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                const x = e.clientX - posX;
+                const y = e.clientY - posY;
+                div.style.left = x + 'px';
+                div.style.top = y + 'px';
+                console.log(`Coordinates: x=${x}, y=${y}`);
+            }
+        });
+
+        // Event listener for mouse up (stop dragging)
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        var source = new EventSource("{{ url_for('sse.stream') }}");
+            source.addEventListener('greeting', function(event) {
+                var data = JSON.parse(event.data);
+                console.log(data)
+                const myArray = data.message.split(",");
+                x = myArray[0]
+                y = myArray[1]
+                div.style.left = `${x}px`;
+                div.style.top = `${y}px`;
+            }, false);
+       
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <title>MBSA</title>
+</head>
+<body>
+  <h1 class="text-center my-2">MBSA Group Chat App</h1>
+  <div class="container">
+  <form id="message_form">
+    <div class="mb-3">
+      <label for="exampleFormControlInput1" class="form-label">Name:- <span id="entered_name"></span></label>
+      <input type="text" class="form-control" name="message" id="user_message" placeholder="Enter message">
+    </div>
+  </form>
+  </div>
+  <div id='chat-container' class="container" style="overflow-y: scroll; height: 70vh;">
+
+  </div>
+<script>
+  const name = prompt("Enter your name?")
+  document.getElementById("entered_name").innerText = name;
+  
+  // Function to scroll to the bottom
+  function scrollToBottom() {
+  const chatContainer = document.getElementById('chat-container');
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+  document.getElementById("message_form").addEventListener('submit',(e)=>{
+     e.preventDefault()
+
+     user_message = document.getElementById('user_message').value
+
+     const xhr = new XMLHttpRequest();
+const url = '/push'; // Replace with your actual server URL
+const jsonData = { message: `${name}: ${user_message}`};
+
+xhr.open('POST', url, true); // Specify the request method and URL
+xhr.setRequestHeader('Content-Type', 'application/json'); // Set the appropriate header
+
+xhr.onreadystatechange = function() {
+  if (xhr.readyState === 4 && xhr.status === 200) {
+    const response = JSON.parse(xhr.responseText);
+    console.log(response); // Handle the server response here
+  }
+};
+
+xhr.send(JSON.stringify(jsonData));
+document.getElementById("message_form").reset()
+  })
+
+</script>
+<script>
+  var source = new EventSource("{{ url_for('sse.stream') }}");
+  source.addEventListener('greeting', function(event) {
+      var data = JSON.parse(event.data);
+      document.getElementById("chat-container").innerHTML+=`<div class="card my-1">
+      <div class="card-body">
+      ${data.message}
+      </div>
+    </div>`
+scrollToBottom();
+
+  }, false);
+  source.addEventListener('error', function(event) {
+      alert("Failed to connect to event stream. Is Server running?");
+  }, false);
+</script>
+</body>
+</html>
